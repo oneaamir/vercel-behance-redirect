@@ -66,10 +66,12 @@ module.exports = async (req, res) => {
     if (TRACKER_URL) {
       try {
         // Build tracker request - GET with query params
+        // <-- IMPORTANT: we append &via=vercel so Apps Script uses the fast path -->
         const trackerUrl = TRACKER_URL +
           (TRACKER_URL.indexOf('?') === -1 ? '?' : '&') +
           'action=track&rid=' + encodeURIComponent(rid || '') +
-          '&dest=' + encodeURIComponent(dest);
+          '&dest=' + encodeURIComponent(dest) +
+          '&via=vercel';
 
         // Use AbortController to bound time spent waiting for tracker.
         const ac = new AbortController();
@@ -86,9 +88,9 @@ module.exports = async (req, res) => {
     // Issue redirect immediately (HTTP 302)
     res.statusCode = 302;
     res.setHeader('Location', dest);
-    // Some clients like a minimal body
+    // Some clients like a minimal body (escape dest to avoid HTML issues)
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.end(`<html><body>Redirecting… If you are not redirected automatically, <a href="${dest}">click here</a>.</body></html>`);
+    res.end(`<html><body>Redirecting… If you are not redirected automatically, <a href="${escapeHtml(dest)}">click here</a>.</body></html>`);
   } catch (err) {
     console.error('redirect error', err);
     try {
@@ -98,3 +100,5 @@ module.exports = async (req, res) => {
     } catch (e) {}
   }
 };
+
+function escapeHtml(s){ return (s+'').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c])); }
