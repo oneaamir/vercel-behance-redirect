@@ -1,8 +1,8 @@
 {
-  "name": "vercel-behance-redirect",
+  "name": "vercel-redirect",
   "version": "1.0.0",
   "private": true,
   "engines": {
-    "node": "18.x"
+    "node": "22.x"
   }
 }
